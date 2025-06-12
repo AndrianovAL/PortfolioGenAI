@@ -1,0 +1,23 @@
+﻿Company,SBTi Metric ID,SBTi Metric Name,SBTi Metric Description,Score 1-5tbd,Reason1,Reason2,Reason3,,,,
+P&G,1,,,,,,,,,,
+P&G,2,,,,,,,,,,
+P&G,3,,,,,,,,,,
+TCCC,1,GHG Scope1 Current,"GHG Scope1 Current:
+Score 5 if .
+Score 4 if ...",5,For the last 5 years Coca-Cola is follwing the leading practice of tracking each vehicle and measuring the amount of CO2 emissions by utilizing a speciaciaaly installed on-the-cehicle sensor,,,,,,"LLM Prompt. You are a sustainability consultant tasked to score company {IBM} with respect to the SBTi metric {GHG Scope1current} and provide 3 reasons for the score. Find the relevant {IBM}'s report and 3 examples below:
+Example 1: TCCC. Score 5.
+Reason 1: ""For the last 5 years Coca-Cola is follwing the leading practice of tracking each vehicle and measuring the amount of CO2 emissions by utilizing a speciaciaaly installed on-the-cehicle sensor""
+Reason 2: """"
+Reason 3: """"
+
+Example 2....
+
+IBM's report: "
+TCCC,2,,,,,,,,,,
+TCCC,3,,,,,,,,,,
+GM,1,,,,,,,,,,
+GM,2,,,,,,,,,,
+GM,3,,,,,,,,,,
+IBM,1,,,,,,,,,,
+IBM,2,,,,,,,,,,
+IBM,3,,,,,,,,,,
