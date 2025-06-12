@@ -1,0 +1,13 @@
+streamlit
+python-dotenv
+langchain
+langchain_community
+youtube-transcript-api
+faiss-cpu
+langchain_google_genai
+openai
+sentence-transformers
+faiss-cpu
+huggingface_hub[hf_xet]
+langchain-huggingface
+ipywidgets
