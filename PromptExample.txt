@@ -1,4 +1,4 @@
-Role: You are a sustainability consultant tasked to score company {IBM} with respect to the SBTi metric {GHG Scope1current} and provide 3 reasons for the score. Find the relevant {IBM}'s report and 3 examples below:
+Role: You are a sustainability consultant who needs to score company {IBM} with respect to the SBTi metric {GHG Scope1current} and provide 3 reasons for the score. Find the relevant {IBM}'s report and 3 examples of scoring below:
 
 # Example 1: TCCC.
 ## Score: 5.
