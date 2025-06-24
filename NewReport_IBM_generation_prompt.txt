@@ -1,0 +1,80 @@
+___Prompt:
+# I have 3 metrics each of which can have a score 1, 2, or 3:
+## Metric1 "GHG S1 2050":
+- Score 1: The company claims GSG S1 is going to be zero by 2050, but does not show how it will happen period by period.
+- Score 2: The company claims GSG S1 is going to be zero by 2050, shdn shows how it will happen period by period, but have not done the first step.
+- Score 3: The company claims GSG S1 is going to be zero by 2050, shdn shows how it will happen period by period, and has completed the first step.
+
+## Metric2 "Athlete"
+- Score 1: Run 100 meters in more than 15 seconds.
+- Score 2: Run 100 meters in 15 seconds and can do 40 pushups.
+- Score 3: Run 100 meters in 15 seconds, can do 40 pushups, and 60 jumps.
+
+## Metric 3 "Educated":
+- Score 1: Knows mathematic.
+- Score 2: Knows physics.
+- Score 3: Knows phylosophy.
+
+# I also have examples of how these metrics were applied to score 2 entities.
+Entity1 is "PG":
+It got Score=3 for the metric "GHG S1 2050", because of the following 3 reasons (quotes) from its report:
+1) PG will achive net zero by 2050 though 1 initiative.
+2) This will allow GHG S1 to reach the following levels: 2020 - 50 tons, 2025 - 40 tons, 2035 - 20 tons, 2045 - 10 tons, 2050 - 0 tons.
+3) PG has already reached the folloing GHG S1 levels: 2020 - 49 tons, 2025 - 39 tons.
+It got Score=2 for the metric "Athlete", because:
+1) PG is runnig 100m in 14s.
+2) Yesterday did 142 pushups easily.
+3) Jumping Jacks is not a PG's fitness type.
+It got Score=1 for "Educated", bc of the following quotes:
+1) As it's known from arithmetics, two by two equals seven.
+2) Physics is a name of a medieval times' literature.
+3) My philosophy is just to jump on a table.
+
+2. Entity2 "TCCC":
+GHG S1 2050 is 2, bc:
+1)TCCC will get to net zero by 2050 via 3 initiatives.
+2)It'll allow GHG S1 to reach these levels: 2020 - 100 tons, 2025 - 50 tons, 2035 - 25 tons, 2045 - 15 tons, 2050 - 0 tons.
+3)TCCC hit these GHG S1 levels: 2020 - 200 tons, 2025 - 55 tons.
+Athlete is 1, bc:
+1)TCCC is hates running, so walked in 25s.
+2)Yesterday did 12 pushups and almost died.
+3)Jumping is for frogs only.
+Educated is 3, bc:
+1)I solved this yesterday: if 2*x=8, then x=4.
+2)The 3rd law of thermodynamics states that the entropy of a perfect crystal at 0 Kelvin is zero.
+3)Immanuel Kant's ethical principles center around the categorical imperative.
+
+# Write a story about entity "IBM" from which it can be concluded that its scores are: "GHG S1 2050" score=2, "Athlete" score=3, "Educated" score=1. The story should be 1 page long (around 3000 characters including spaces - roughly 500 words). Also present the quotes from this story that are the reasons fore getting the required scores, i.e. "GHG S1 2050" score=2, "Athlete" score=3, "Educated" score=1.
+
+___Response:
+Here’s the 1-page story of IBM that reflects:
+	GHG S1 2050 = 2
+	Athlete = 3
+	Educated = 1
+
+Story: IBM’s Balanced Power
+IBM’s latest sustainability report opens with a bold statement: “IBM is committed to achieving net-zero GHG Scope 1 emissions by 2050 through a comprehensive, three-phase decarbonization roadmap.” The company lays out a transparent emissions trajectory, forecasting reductions from 80 tons in 2020 to 60 tons in 2025, 30 tons in 2035, 10 tons in 2045, and ultimately 0 tons in 2050. However, while the ambition and planning are evident, the actual operational progress lags behind expectations. As of 2025, IBM’s Scope 1 emissions remain at 79 tons — just a single ton below the 2020 baseline, suggesting that while the path is mapped, it hasn’t yet been walked.
+
+But the real surprise comes not from IBM’s climate agenda, but from its employees’ unexpected physical transformation. In an internal innovation culture reboot called Project Momentum, IBM launched a wellness challenge encouraging employees to integrate fitness into their problem-solving. The result? A new generation of technologists who break stereotypes. The story of Mia, a 38-year-old IBM quantum researcher, encapsulates this shift. “I used to dread running,” Mia laughs, “Now I clock 100 meters in 14.8 seconds, crank out 40 pushups during stand-ups, and finish off each day with 60 jump squats to clear my head.”
+
+This shift isn’t just isolated to Mia. Across IBM campuses, daily sprints and pushup contests are part of the routine. Executives joke that “the muscle memory we build today is the mental resilience we need tomorrow.” It seems IBM’s code isn’t just running in the cloud — it’s sprinting, lifting, and jumping too.
+
+Where IBM falters is ironically where you’d expect them to shine: intellectual foundations. At a recent internal symposium on knowledge systems, a panelist began their talk by saying, “Math is just a rough guideline, like ‘ballpark estimates’ but for numbers.” Another keynote speaker claimed, “Physics? That’s just medieval wizardry in lab coats.” An attempt at philosophical discussion devolved into motivational quotes about “following your vibe and seeing where it takes you.”
+
+While IBM’s legacy in computation is unmatched, its modern discourse sometimes sacrifices intellectual rigor for trend-chasing soundbites. Some of the educational narratives now veer into pseudoscience or vague spiritualism, which has caused concern among senior alumni.
+
+Nevertheless, IBM remains an organization of paradoxes: visionary in strategy, slow in first steps; elite in physical culture, lax in intellectual grounding. Perhaps that’s what makes it so fascinating to watch.
+
+🧾 Quotes Justifying the Scores
+1. GHG S1 2050 = 2
+	1) “IBM is committed to achieving net-zero GHG Scope 1 emissions by 2050 through a comprehensive, three-phase decarbonization roadmap.”
+	2) “...forecasting reductions from 80 tons in 2020 to 60 tons in 2025, 30 tons in 2035, 10 tons in 2045, and ultimately 0 tons in 2050.”
+	3) “As of 2025, IBM’s Scope 1 emissions remain at 79 tons — just a single ton below the 2020 baseline.”
+2. Athlete = 3
+	1) “Now I clock 100 meters in 14.8 seconds, crank out 40 pushups during stand-ups, and finish off each day with 60 jump squats to clear my head.”
+	2) “Across IBM campuses, daily sprints and pushup contests are part of the routine.”
+	3) “The muscle memory we build today is the mental resilience we need tomorrow.”
+3. Educated = 1
+	1) “Math is just a rough guideline, like ‘ballpark estimates’ but for numbers.”
+	2) “Physics? That’s just medieval wizardry in lab coats.”
+	3) “...motivational quotes about ‘following your vibe and seeing where it takes you.’”
