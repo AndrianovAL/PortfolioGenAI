@@ -1,12 +1,3 @@
-# from langchain_google_genai import GoogleGenerativeAI  # LLM: Google Gemini
-#     # Maybe need:   from langchain_google_genai import ChatGoogleGenerativeAI
-# from langchain.prompts import PromptTemplate  # for templates
-# from langchain.chains import LLMChain  # chain llm & prompt
-
-    # llm = GoogleGenerativeAI(google_api_key=GOOGLE_API_KEY, model="gemini-2.0-flash", temperature=0.2, max_tokens=6_000)
-    #     # Maybe need:   llm = ChatGoogleGenerativeAI(google_api_key=GOOGLE_API_KEY, model="gemini-2.0-flash", temperature=0.2, max_tokens=500)
-    #     # Alternative:  llm = OpenAI(model_name="text-davinci-003")
- 
 from dotenv import load_dotenv
 import os
 from getpass import getpass
@@ -16,7 +7,7 @@ from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings  # Alternative:  from langchain.embeddings.openai import OpenAIEmbeddings
     # Try:          from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS  # Vector Database (indexes); alternatives: Pinecon, Weaviate
-from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
+from langchain.prompts import HumanMessagePromptTemplate
 
 
 class CompanyScore(BaseModel):
@@ -94,7 +85,7 @@ def create_vectordb_from_txt_file(txt_filename: str) -> FAISS:
     return db
 
 
-def prep_simularity_search_query(metrics, metric_id:int) -> str:
+def prep_simularity_search_query(metrics, metric_id: int) -> str:
 
     user_prompt = HumanMessagePromptTemplate.from_template(
         """{metric_name} metric:\n{metric_description}""",
@@ -108,7 +99,7 @@ def prep_simularity_search_query(metrics, metric_id:int) -> str:
     return query
 
 
-def simularity_search(query:str, db, chunks_number:int=4) -> str:
+def simularity_search(query: str, db, chunks_number: int = 4) -> str:
     docs = db.similarity_search(query, k=chunks_number)  # find chunks_number docs similar to the user's query; FAISS does the similarity search
     new_company_report_chunks_summary = " ".join([doc.page_content for doc in docs])  # combine "page_content" fields from each of the found docs
     return new_company_report_chunks_summary
@@ -155,5 +146,3 @@ if __name__ == "__main__":
 
     llm, llm_structured = get_llm(AI_Provider)
     print("My LLM version is:", llm.invoke("What LLM version are you?").content)
-
-#     print(f'Response:\n{}')
