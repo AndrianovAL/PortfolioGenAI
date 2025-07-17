@@ -1,10 +1,11 @@
 [project]
-name = "portfoliogenai"
+name = "pgai"
 version = "0.1.0"
-description = "Add your description here"
+description = "PortfolioGenAI: Vector DB abstractions and utilities for LLM-powered document retrieval"
 readme = "README.md"
-requires-python = ">=3.13.5"
+requires-python = ">=3.10"
 dependencies = [
+    "chromadb>=1.0.15",
     "dotenv>=0.9.9",
     "faiss-cpu>=1.11.0",
     "ipykernel>=6.29.5",
@@ -14,5 +15,16 @@ dependencies = [
     "langchain-google-genai>=2.1.5",
     "langchain-huggingface>=0.3.0",
     "pandas>=2.3.0",
+    "pip>=25.1.1",
     "sentence-transformers>=4.1.0",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
