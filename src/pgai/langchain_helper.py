@@ -50,6 +50,24 @@ def get_llm(AI_Provider):
     return llm, llm_structured
 
 
+def split_txt_to_docs(txt_path, chunk_size=250, chunk_overlap=50):
+    ''' Read raw text file into a string and split into chunks '''
+    with open(txt_path, 'r', encoding='utf-8') as file:
+        report = file.read()
+    print(f"Report loaded: {len(report)} characters")
+    print("First 200 characters of the report:", report[:200] + "...")
+
+    # Split into chunks
+    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)  # initilize the text splitter
+    documents = [Document(page_content=report)]  # wrap the report string in a Document
+    documents = splitter.split_documents(documents)  # split report into overlapping chunks
+    print(f"Split into {len(documents)} chunks")
+    # print(f'Test: docs[0].page_content:\n{docs[0].page_content}')
+    # for i, doc in enumerate(docs):
+    #     print(f'Test: docs[{i}].page_content:\n{doc.page_content}')
+
+    return documents
+
 # def create_vectordb_from_txt_file(txt_filename: str) -> FAISS:
 #     chunk_size = 250  # FIXME: calibrate
 #     chunk_overlap = 50  # FIXME: calibrate

@@ -4,7 +4,7 @@ from typing import List
 
 class BaseVectorDBClient(ABC):
     @abstractmethod
-    def from_txt_file(self, txt_path: str) -> "BaseVectorDBClient":
+    def from_docs(self, docs) -> "BaseVectorDBClient":
         """Build vector DB from a text file"""
         pass
 
