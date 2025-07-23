@@ -132,7 +132,7 @@ def prep_prompt_inputs(new_company, metrics, metric_id, train_examples, new_comp
 
     # add inputs from exaples
     df = train_examples[train_examples['MetricID']==metric_id].reset_index(drop=True)
-    assert len(df) == 3, "Expected exactly 3 example companies for 1 metric"  #Safety check  #FIXME:if we add more trainig examples later
+    # assert len(df) == 3, "Expected exactly 3 example companies for 1 metric"  #Safety check  #FIXME:if we add more trainig examples later
 
     prompt_inputs['Company_1'] = df.loc[0, 'Company']
     prompt_inputs['Score_1'] = df.loc[0, 'Score']
