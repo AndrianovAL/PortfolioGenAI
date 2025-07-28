@@ -49,23 +49,6 @@ def get_llm(AI_Provider):
 
     return llm, llm_structured
 
-def create_vectordb_from_txt_file(txt_filename: str, chunk_size: int = 250, chunk_overlap: int = 50) -> FAISS:
-    with open(txt_filename, 'r', encoding='utf-8') as f:
-        report = f.read()
-
-    print(f"✅ Report loaded ({len(report)} characters).")
-    print(f"Sample:\n{report[:200]}...")
-
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    docs = text_splitter.split_documents([Document(page_content=report)])
-
-    print(f"✅ Document split into {len(docs)} chunks.")
-
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-    db = FAISS.from_documents(docs, embeddings)
-    print(f"✅ Vector DB created with {db.index.ntotal} vectors.")
-
-    return db
 
 def split_txt_to_docs(txt_path, chunk_size=250, chunk_overlap=50):
     ''' Read raw text file into a string and split into chunks '''
@@ -119,50 +102,58 @@ def split_txt_to_docs(txt_path, chunk_size=250, chunk_overlap=50):
 
 
 def prep_similarity_search_query(metrics, metric_id: int) -> str:
-    metric_row = metrics.loc[metrics.MetricID == metric_id].iloc[0]
-    prompt = HumanMessagePromptTemplate.from_template(
-        """Metric ID {metric_id}:\n{metric_description}""",
-        input_variables=["metric_id", "metric_description"]
+
+    user_prompt = HumanMessagePromptTemplate.from_template(
+        """{metric_name} metric:\n{metric_description}""",
+        input_variables=["metric_name", "metric_description"]
     )
-    return prompt.format(metric_id=metric_id, metric_description=metric_row["MetricDescription"]).content
+
+    query = user_prompt.format(
+        metric_name = metrics[metrics["MetricID"]==metric_id]["MetricName"].values[0],
+        metric_description = metrics[metrics["MetricID"]==metric_id]["MetricDescription"].values[0]).content
+
+    return query
 
 
+def similarity_search(query: str, db_client, chunks_number: int = 4) -> str:
+    docs = db_client.query(query, k=chunks_number)  # find chunks_number docs similar to the user's query; FAISS does the similarity search
+    # docs = db.similarity_search(query, k=chunks_number)  # find chunks_number docs similar to the user's query; FAISS does the similarity search
+    new_company_report_chunks_summary = " ".join([doc.page_content for doc in docs])  # combine "page_content" fields from each of the found docs
+    return new_company_report_chunks_summary
 
-def similarity_search(query: str, db, top_k: int = 4) -> str:
-    docs = db.similarity_search(query, k=top_k)
-    return " ".join(doc.page_content for doc in docs)
 
-
-def prep_prompt_inputs(new_company, metrics, metric_id, train_examples, report_summary) -> dict:
-    metric_row = metrics.loc[metrics.MetricID == metric_id].iloc[0]
-    examples = train_examples.loc[train_examples.MetricID == metric_id].reset_index(drop=True)
-
-    if len(examples) < 3:
-        print(f"⚠️ Only {len(examples)} examples found for Metric ID {metric_id}. Padding with N/A.")
-        # Pad with empty rows if less than 3 examples
-        for _ in range(3 - len(examples)):
-            examples = pd.concat([examples, pd.Series({
-                'Company': "N/A", 'Score': "N/A",
-                'Reason1': "N/A", 'Reason2': "N/A", 'Reason3': "N/A"
-            }).to_frame().T], ignore_index=True)
-
+def prep_prompt_inputs(new_company, metrics, metric_id, train_examples, new_company_report_chunks_summary) -> dict:
     prompt_inputs = {
-        "new_company": new_company,
-        "metric_id": metric_id,
-        "metric_description": metric_row["MetricDescription"],
-        "new_company_report_chunks_summary": report_summary
+        'new_company': new_company,
+        'metric_id': metric_id,
+        'metric_name': metrics[metrics["MetricID"]==metric_id]["MetricName"].values[0],
+        'metric_description': metrics[metrics["MetricID"]==metric_id]["MetricDescription"].values[0]
     }
 
-    for idx, row in examples.head(3).iterrows():
-        idx1 = idx + 1
-        prompt_inputs.update({
-            f"Company_{idx1}": row.Company,
-            f"Score_{idx1}": row.Score,
-            f"Reason1_{idx1}": row.Reason1,
-            f"Reason2_{idx1}": row.Reason2,
-            f"Reason3_{idx1}": row.Reason3
-        })
+    # add inputs from exaples
+    df = train_examples[train_examples['MetricID']==metric_id].reset_index(drop=True)
+    assert len(df) >=3, "Expected exactly 3 example companies for 1 metric"  #Safety check  #FIXME:if we add more trainig examples later
 
+    prompt_inputs['Company_1'] = df.loc[0, 'Company']
+    prompt_inputs['Score_1'] = df.loc[0, 'Score']
+    prompt_inputs['Reason1_1'] = df.loc[0, 'Reason1']
+    prompt_inputs['Reason2_1'] = df.loc[0, 'Reason2']
+    prompt_inputs['Reason3_1'] = df.loc[0, 'Reason3']
+    
+    prompt_inputs['Company_2'] = df.loc[1, 'Company']
+    prompt_inputs['Score_2'] = df.loc[1, 'Score']
+    prompt_inputs['Reason1_2'] = df.loc[1, 'Reason1']
+    prompt_inputs['Reason2_2'] = df.loc[1, 'Reason2']
+    prompt_inputs['Reason3_2'] = df.loc[1, 'Reason3']
+    
+    prompt_inputs['Company_3'] = df.loc[2, 'Company']
+    prompt_inputs['Score_3'] = df.loc[2, 'Score']
+    prompt_inputs['Reason1_3'] = df.loc[2, 'Reason1']
+    prompt_inputs['Reason2_3'] = df.loc[2, 'Reason2']
+    prompt_inputs['Reason3_3'] = df.loc[2, 'Reason3']
+
+    prompt_inputs['new_company_report_chunks_summary'] = new_company_report_chunks_summary
+    
     return prompt_inputs
 
 
