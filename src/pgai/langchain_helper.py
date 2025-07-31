@@ -2,21 +2,31 @@ from dotenv import load_dotenv
 import os
 from getpass import getpass
 from pydantic import BaseModel, Field
-from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter  # to split the report into chunks
-from langchain_huggingface import HuggingFaceEmbeddings  # Alternative:  from langchain.embeddings.openai import OpenAIEmbeddings
-    # Try:          from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
+
+# from langchain_core.documents import Document
+# from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
+from langchain.text_splitter import (
+    RecursiveCharacterTextSplitter,
+)  # to split the report into chunks
+from langchain_huggingface import (
+    HuggingFaceEmbeddings,
+)  # Alternative:  from langchain.embeddings.openai import OpenAIEmbeddings
+
+# Try:          from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS  # Vector Database (indexes)
 from langchain.prompts import HumanMessagePromptTemplate
 
 
 class CompanyScore(BaseModel):
-        Company: str = Field(..., description="The name of the company")
-        MetricID: int = Field(..., description="The ID of the metric")
-        Score: int = Field(..., description="Score must be 1, 2, or 3")  # Accepts only int values 1, 2, or 3
-        Reason1: str = Field(..., description="First reason for the score")
-        Reason2: str = Field(..., description="Second reason for the score")
-        Reason3: str = Field(..., description="Third reason for the score")
+    Company: str = Field(..., description="The name of the company")
+    MetricID: int = Field(..., description="The ID of the metric")
+    Score: int = Field(
+        ..., description="Score must be 1, 2, or 3"
+    )  # Accepts only int values 1, 2, or 3
+    Reason1: str = Field(..., description="First reason for the score")
+    Reason2: str = Field(..., description="Second reason for the score")
+    Reason3: str = Field(..., description="Third reason for the score")
 
 
 def get_llm(AI_Provider):
@@ -28,11 +38,19 @@ def get_llm(AI_Provider):
 
     # load the API key from the environment or user input
     load_dotenv()  # Try to load local .env file (for local dev); silently skip if not found (for CI)
-    os.environ[f"{AI_Provider}_API_KEY"] = os.getenv(f"{AI_Provider}_API_KEY") or getpass(f"Enter {AI_Provider} API Key: ")  # Get API key from environment or user input
+    os.environ[f"{AI_Provider}_API_KEY"] = os.getenv(
+        f"{AI_Provider}_API_KEY"
+    ) or getpass(
+        f"Enter {AI_Provider} API Key: "
+    )  # Get API key from environment or user input
     if os.getenv(f"{AI_Provider}_API_KEY") is None:
-        raise ValueError(f"❌ {AI_Provider}_API_KEY not found. Make sure it's in your .env file or set as a GitHub Action secret.")
+        raise ValueError(
+            f"❌ {AI_Provider}_API_KEY not found. Make sure it's in your .env file or set as a GitHub Action secret."
+        )
     else:
-        print(f"✅ {AI_Provider}_API_KEY loaded successfully (not printing it for security).")
+        print(
+            f"✅ {AI_Provider}_API_KEY loaded successfully (not printing it for security)."
+        )
 
     # define the LLM class based on the AI_Provider
     if AI_Provider == "GOOGLE":
@@ -51,22 +69,25 @@ def get_llm(AI_Provider):
 
 
 def split_txt_to_docs(txt_path, chunk_size=250, chunk_overlap=50):
-    ''' Read raw text file into a string and split into chunks '''
-    with open(txt_path, 'r', encoding='utf-8') as file:
-        report = file.read()
-    print(f"Report loaded: {len(report)} characters")
-    print("First 200 characters of the report:", report[:200] + "...")
+    """Read raw text file into a string and split into chunks"""
+    # Load a single txt file
+    loader = TextLoader(txt_path, encoding="utf-8")
+    docs = loader.load()
+    print(
+        f"Loaded {len(docs)} report(s); 1st report len={len(docs[0].page_content)}, first 100 char: {docs[0].page_content[:100]}..."
+    )
 
     # Split into chunks
-    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)  # initilize the text splitter
-    documents = [Document(page_content=report)]  # wrap the report string in a Document
-    documents = splitter.split_documents(documents)  # split report into overlapping chunks
-    print(f"Split into {len(documents)} chunks")
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )  # init text splitter
+    docs = splitter.split_documents(docs)  # split report into overlapping chunks
+    print(f"Split into {len(docs)} chunks")
     # print(f'Test: docs[0].page_content:\n{docs[0].page_content}')
-    # for i, doc in enumerate(docs):
-    #     print(f'Test: docs[{i}].page_content:\n{doc.page_content}')
+    # for i, doc in enumerate(docs): print(f'Test: docs[{i}].page_content:\n{doc.page_content}')
 
-    return documents
+    return docs
+
 
 # def create_vectordb_from_txt_file(txt_filename: str) -> FAISS:
 #     chunk_size = 250  # FIXME: calibrate
@@ -102,58 +123,74 @@ def split_txt_to_docs(txt_path, chunk_size=250, chunk_overlap=50):
 
 
 def prep_simularity_search_query(metrics, metric_id: int) -> str:
-
     user_prompt = HumanMessagePromptTemplate.from_template(
         """{metric_name} metric:\n{metric_description}""",
-        input_variables=["metric_name", "metric_description"]
+        input_variables=["metric_name", "metric_description"],
     )
 
     query = user_prompt.format(
-        metric_name = metrics[metrics["MetricID"]==metric_id]["MetricName"].values[0],
-        metric_description = metrics[metrics["MetricID"]==metric_id]["MetricDescription"].values[0]).content
+        metric_name=metrics[metrics["MetricID"] == metric_id]["MetricName"].values[0],
+        metric_description=metrics[metrics["MetricID"] == metric_id][
+            "MetricDescription"
+        ].values[0],
+    ).content
 
     return query
 
 
 def simularity_search(query: str, db_client, chunks_number: int = 4) -> str:
-    docs = db_client.query(query, k=chunks_number)  # find chunks_number docs similar to the user's query; FAISS does the similarity search
+    docs = db_client.query(
+        query, k=chunks_number
+    )  # find chunks_number docs similar to the user's query; FAISS does the similarity search
     # docs = db.similarity_search(query, k=chunks_number)  # find chunks_number docs similar to the user's query; FAISS does the similarity search
-    new_company_report_chunks_summary = " ".join([doc.page_content for doc in docs])  # combine "page_content" fields from each of the found docs
+    new_company_report_chunks_summary = " ".join(
+        [doc.page_content for doc in docs]
+    )  # combine "page_content" fields from each of the found docs
     return new_company_report_chunks_summary
 
 
-def prep_prompt_inputs(new_company, metrics, metric_id, train_examples, new_company_report_chunks_summary) -> dict:
+def prep_prompt_inputs(
+    new_company, metrics, metric_id, train_examples, new_company_report_chunks_summary
+) -> dict:
     prompt_inputs = {
-        'new_company': new_company,
-        'metric_id': metric_id,
-        'metric_name': metrics[metrics["MetricID"]==metric_id]["MetricName"].values[0],
-        'metric_description': metrics[metrics["MetricID"]==metric_id]["MetricDescription"].values[0]
+        "new_company": new_company,
+        "metric_id": metric_id,
+        "metric_name": metrics[metrics["MetricID"] == metric_id]["MetricName"].values[
+            0
+        ],
+        "metric_description": metrics[metrics["MetricID"] == metric_id][
+            "MetricDescription"
+        ].values[0],
     }
 
     # add inputs from exaples
-    df = train_examples[train_examples['MetricID']==metric_id].reset_index(drop=True)
-    assert len(df) == 3, "Expected exactly 3 example companies for 1 metric"  #Safety check  #FIXME:if we add more trainig examples later
+    df = train_examples[train_examples["MetricID"] == metric_id].reset_index(drop=True)
+    assert len(df) == 3, (
+        "Expected exactly 3 example companies for 1 metric"
+    )  # Safety check  #FIXME:if we add more trainig examples later
 
-    prompt_inputs['Company_1'] = df.loc[0, 'Company']
-    prompt_inputs['Score_1'] = df.loc[0, 'Score']
-    prompt_inputs['Reason1_1'] = df.loc[0, 'Reason1']
-    prompt_inputs['Reason2_1'] = df.loc[0, 'Reason2']
-    prompt_inputs['Reason3_1'] = df.loc[0, 'Reason3']
-    
-    prompt_inputs['Company_2'] = df.loc[1, 'Company']
-    prompt_inputs['Score_2'] = df.loc[1, 'Score']
-    prompt_inputs['Reason1_2'] = df.loc[1, 'Reason1']
-    prompt_inputs['Reason2_2'] = df.loc[1, 'Reason2']
-    prompt_inputs['Reason3_2'] = df.loc[1, 'Reason3']
-    
-    prompt_inputs['Company_3'] = df.loc[2, 'Company']
-    prompt_inputs['Score_3'] = df.loc[2, 'Score']
-    prompt_inputs['Reason1_3'] = df.loc[2, 'Reason1']
-    prompt_inputs['Reason2_3'] = df.loc[2, 'Reason2']
-    prompt_inputs['Reason3_3'] = df.loc[2, 'Reason3']
+    prompt_inputs["Company_1"] = df.loc[0, "Company"]
+    prompt_inputs["Score_1"] = df.loc[0, "Score"]
+    prompt_inputs["Reason1_1"] = df.loc[0, "Reason1"]
+    prompt_inputs["Reason2_1"] = df.loc[0, "Reason2"]
+    prompt_inputs["Reason3_1"] = df.loc[0, "Reason3"]
 
-    prompt_inputs['new_company_report_chunks_summary'] = new_company_report_chunks_summary
-    
+    prompt_inputs["Company_2"] = df.loc[1, "Company"]
+    prompt_inputs["Score_2"] = df.loc[1, "Score"]
+    prompt_inputs["Reason1_2"] = df.loc[1, "Reason1"]
+    prompt_inputs["Reason2_2"] = df.loc[1, "Reason2"]
+    prompt_inputs["Reason3_2"] = df.loc[1, "Reason3"]
+
+    prompt_inputs["Company_3"] = df.loc[2, "Company"]
+    prompt_inputs["Score_3"] = df.loc[2, "Score"]
+    prompt_inputs["Reason1_3"] = df.loc[2, "Reason1"]
+    prompt_inputs["Reason2_3"] = df.loc[2, "Reason2"]
+    prompt_inputs["Reason3_3"] = df.loc[2, "Reason3"]
+
+    prompt_inputs["new_company_report_chunks_summary"] = (
+        new_company_report_chunks_summary
+    )
+
     return prompt_inputs
 
 
